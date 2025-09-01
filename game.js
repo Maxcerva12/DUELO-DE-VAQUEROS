@@ -171,9 +171,9 @@ class VaquerosGame {
         this.controls.style.display = 'block';
         document.body.className = 'game-playing';
         
-        // Inicializar jugadores
-        this.player1 = new Player(1, 100, this.height - 150, 'player1');
-        this.player2 = new Player(2, this.width - 200, this.height - 150, 'player2');
+        // Inicializar jugadores - Posicionarlos más abajo en el suelo
+        this.player1 = new Player(1, 100, this.height - 170, 'player1');
+        this.player2 = new Player(2, this.width - 200, this.height - 170, 'player2');
         
         
         this.bullets = [];
@@ -357,8 +357,11 @@ class VaquerosGame {
         // Límites del canvas
         if (player.x < 0) player.x = 0;
         if (player.x + player.width > this.width) player.x = this.width - player.width;
-        if (player.y > this.height - 100) {
-            player.y = this.height - 100;
+        
+        // Límite del suelo - Ajustar para que los jugadores estén más centrados en el suelo
+        const groundLevel = this.height - 50; 
+        if (player.y + player.height > groundLevel) {
+            player.y = groundLevel - player.height;
             player.grounded = true;
             player.velocityY = 0;
             player.isJumping = false;
@@ -613,6 +616,18 @@ class VaquerosGame {
     }
     
     drawPlayer(player) {
+        // Dibujar sombra ANTES del jugador para que quede abajo
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        this.ctx.beginPath();
+        this.ctx.ellipse(
+            player.x + player.width / 2,
+            this.height - 55, 
+            player.width / 2,
+            8,
+            0, 0, Math.PI * 2
+        );
+        this.ctx.fill();
+        
         this.ctx.save();
         
         // Principio 4: Straight Ahead and Pose to Pose - Interpolación de poses
@@ -667,18 +682,6 @@ class VaquerosGame {
         }
         
         this.ctx.restore();
-        
-        // Sombra del jugador
-        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-        this.ctx.beginPath();
-        this.ctx.ellipse(
-            player.x + player.width / 2,
-            this.height - 90,
-            player.width / 2,
-            10,
-            0, 0, Math.PI * 2
-        );
-        this.ctx.fill();
     }
     
     drawBullets() {
