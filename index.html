@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duelo de Vaqueros - Wild West Showdown</title>
+    
+    <!-- Fuentes de Google -->
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Rye&family=Cinzel:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Estilos principales -->
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body class="game-start">
+    <div id="gameContainer">
+        <!-- Pantalla de inicio -->
+        <div id="startScreen">
+            <h1 class="game-title">DUELO DE VAQUEROS</h1>
+            <p class="subtitle">Wild West Showdown</p>
+            <button class="btn" id="startBtn">INICIAR PARTIDA</button>
+            <button class="btn" id="instructionsBtn">INSTRUCCIONES</button>
+        </div>
+        
+        <!-- Pantalla de instrucciones -->
+        <div id="instructionsScreen" style="display: none;">
+            <div style="background: rgba(0,0,0,0.9); padding: 40px; border-radius: 20px; border: 3px solid #FFD700; max-width: 800px; margin: 20px;">
+                <h2 style="color: #FFD700; font-family: 'Creepster', cursive; font-size: 2.5rem; text-align: center; margin-bottom: 30px;">INSTRUCCIONES</h2>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
+                    <div style="background: rgba(139, 69, 19, 0.8); padding: 20px; border-radius: 15px; border: 2px solid #FFD700;">
+                        <h3 style="color: #FFD700; font-family: 'Cinzel', serif; margin-bottom: 15px;">🤠 JUGADOR 1</h3>
+                        <ul style="color: white; font-family: 'Cinzel', serif; list-style: none; padding: 0;">
+                            <li><strong>A, D:</strong> Moverse izquierda/derecha</li>
+                            <li><strong>W:</strong> Saltar</li>
+                            <li><strong>J:</strong> Disparar</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="background: rgba(139, 69, 19, 0.8); padding: 20px; border-radius: 15px; border: 2px solid #FFD700;">
+                        <h3 style="color: #FFD700; font-family: 'Cinzel', serif; margin-bottom: 15px;">🤠 JUGADOR 2</h3>
+                        <ul style="color: white; font-family: 'Cinzel', serif; list-style: none; padding: 0;">
+                            <li><strong>←, →:</strong> Moverse izquierda/derecha</li>
+                            <li><strong>↑:</strong> Saltar</li>
+                            <li><strong>1:</strong> Disparar</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; color: #F5DEB3; font-family: 'Cinzel', serif; margin-bottom: 20px;">
+                    <p style="font-size: 1.2rem; margin-bottom: 10px;">🎯 <strong>OBJETIVO:</strong> Reduce la vida de tu oponente a cero</p>
+                    <p>🎵 Disfruta de los efectos de sonido inmersivos</p>
+                </div>
+                
+                <div style="text-align: center;">
+                    <button class="btn" id="backToMenuBtn">VOLVER AL MENÚ</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Canvas del juego -->
+        <canvas id="gameCanvas" width="1000" height="600" style="display: none;"></canvas>
+        
+        <!-- Información del juego -->
+        <div id="gameInfo" style="display: none;">
+            <div class="player-info player1 slide-in-left">
+                <div style="font-size: 1.1rem; margin-bottom: 5px;">🤠 JUGADOR 1</div>
+                <div class="health-bar">
+                    <div class="health-fill" id="player1HealthBar" style="width: 100%;"></div>
+                </div>
+                <div style="margin-top: 5px; font-size: 0.9rem;">Vida: <span id="player1Health">100</span>/100</div>
+            </div>
+            
+            <div class="player-info player2 slide-in-right">
+                <div style="font-size: 1.1rem; margin-bottom: 5px;">🤠 JUGADOR 2</div>
+                <div class="health-bar">
+                    <div class="health-fill" id="player2HealthBar" style="width: 100%;"></div>
+                </div>
+                <div style="margin-top: 5px; font-size: 0.9rem;">Vida: <span id="player2Health">100</span>/100</div>
+            </div>
+        </div>
+        
+        <!-- Controles -->
+        <div id="controls" style="display: none;">
+            <div class="control-section">
+                <strong>🤠 Jugador 1:</strong> A,D (moverse), W (saltar), J (disparar)
+            </div>
+            <div class="control-section">
+                <strong>🤠 Jugador 2:</strong> Flechas (moverse), ↑ (saltar), 1 (disparar)
+            </div>
+            <div class="control-section">
+                <strong>⚙️ General:</strong> P (pausar), ESC (menú)
+            </div>
+        </div>
+        
+        <!-- Pantalla de Game Over -->
+        <div id="gameOverScreen">
+            <h2 class="game-over-title">GAME OVER</h2>
+            <p class="winner-text" id="winnerText">¡Jugador X Gana!</p>
+            <div>
+                <button class="btn" id="playAgainBtn">JUGAR DE NUEVO</button>
+                <button class="btn" id="mainMenuBtn">MENÚ PRINCIPAL</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="game.js"></script>
+</body>
+</html>
