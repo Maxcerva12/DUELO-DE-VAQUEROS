@@ -74,7 +74,8 @@ class VaquerosGame {
                 shoot: new Audio('assets/sonidos/disparo.mp3'),
                 jump: new Audio('assets/sonidos/salto.mp3'),
                 start: new Audio('assets/sonidos/inicio.mp3'),
-                victory: new Audio('assets/sonidos/victoria.mp3')
+                victory: new Audio('assets/sonidos/victoria.mp3'),
+                impact: new Audio('assets/sonidos/disparo.mp3'),
             };
             
             
@@ -82,6 +83,12 @@ class VaquerosGame {
                 sound.volume = 0.5;
                 sound.preload = 'auto';
             });
+            
+            // Configuración específica para el sonido de impacto (más corto y distorsionado)
+            if (this.sounds.impact) {
+                this.sounds.impact.playbackRate = 1.5; // Más rápido
+                this.sounds.impact.volume = 0.4; // Volumen más bajo
+            }
             
             console.log('Sonidos cargados correctamente');
         } catch (error) {
@@ -91,7 +98,8 @@ class VaquerosGame {
                 shoot: { play: () => {}, currentTime: 0 },
                 jump: { play: () => {}, currentTime: 0 },
                 start: { play: () => {}, currentTime: 0 },
-                victory: { play: () => {}, currentTime: 0 }
+                victory: { play: () => {}, currentTime: 0 },
+                impact: { play: () => {}, currentTime: 0, playbackRate: 1 },
             };
         }
     }
@@ -169,9 +177,23 @@ class VaquerosGame {
         this.canvas.style.display = 'block';
         this.gameInfo.style.display = 'flex';
         this.controls.style.display = 'block';
+        this.controls.style.opacity = '1'; 
         document.body.className = 'game-playing';
         
-        // Inicializar jugadores - Posicionarlos más abajo en el suelo
+        // Ocultar los controles después de 3 segundos
+        if (this.controlsTimer) {
+            clearTimeout(this.controlsTimer);
+        }
+        this.controlsTimer = setTimeout(() => {
+            if (this.controls) {
+                this.controls.style.opacity = '0';
+                setTimeout(() => {
+                    this.controls.style.display = 'none';
+                }, 500); // 500ms para la transición de desvanecimiento
+            }
+        }, 3000);
+        
+        // Inicializar jugadores 
         this.player1 = new Player(1, 100, this.height - 170, 'player1');
         this.player2 = new Player(2, this.width - 200, this.height - 170, 'player2');
         
@@ -325,6 +347,11 @@ class VaquerosGame {
         // Principio 1: Squash and Stretch - Los jugadores se comprimen al aterrizar
         player.updateSquashStretch();
         
+        // Forzar al suelo si está flotando sin moverse
+        if (!player.grounded && Math.abs(player.velocityY) < 0.1 && Math.abs(player.velocityX) < 0.1) {
+            player.velocityY = 5; // Aplicar una velocidad hacia abajo para que caiga al suelo
+        }
+        
         // Principio 2: Anticipation - Preparación antes del salto
         if (this.keys[controls.jump] && player.grounded && !player.jumpAnticipation) {
             player.startJumpAnticipation();
@@ -372,6 +399,8 @@ class VaquerosGame {
                 player.wasInAir = false;
                 this.createLandingParticles(player);
             }
+        } else {
+            player.grounded = false;
         }
     }
     
@@ -410,9 +439,15 @@ class VaquerosGame {
             if (this.isColliding(bullet, target)) {
                 // Principio 8: Appeal - Efecto visual impactante
                 this.createHitEffect(target);
-                target.takeDamage(20);
+                target.takeDamage(10);
                 this.bullets.splice(i, 1);
                 this.screenShake = 15;
+                
+                // Reproducir sonido de impacto
+                if (this.sounds.impact) {
+                    this.sounds.impact.currentTime = 0;
+                    this.sounds.impact.play();
+                }
                 
                 // Principio 11: Exaggeration - Knockback exagerado
                 target.applyKnockback(bullet.direction);
@@ -801,7 +836,11 @@ class Player {
     
     applyGravity() {
         if (!this.grounded) {
-            this.velocityY += 0.8; // Gravedad
+            // Aumentamos la gravedad para que vuelva más rápido al suelo después de un knockback
+            this.velocityY += 1.2; 
+            
+            // Limitamos la velocidad máxima de caída para evitar que caiga demasiado rápido
+            if (this.velocityY > 15) this.velocityY = 15;
         }
         
         // Actualizar timer de anticipación
@@ -870,6 +909,8 @@ class Player {
         // Principio 11: Exaggeration - Knockback exagerado
         this.velocityX += direction * 3;
         this.velocityY = -2;
+        // Asegurarse de que el personaje vuelve al suelo rápidamente
+        this.grounded = false; // Inicialmente lo sacamos del suelo
     }
 }
 

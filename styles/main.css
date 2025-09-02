@@ -295,6 +295,7 @@ body::before {
     text-align: center;
     animation: controlsSlide 1s ease-out 0.6s both;
     z-index: 100;
+    transition: opacity 0.5s ease-out;
 }
 
 @keyframes controlsSlide {
