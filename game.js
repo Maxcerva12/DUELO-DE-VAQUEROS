@@ -9,6 +9,9 @@ class VaquerosGame {
         this.gameState = 'menu'; 
         this.gameTime = 0;
         
+        // Variable para controlar la secuencia de fin de juego
+        this.gameEndingSequence = false;
+        
         // Referencias a elementos del DOM
         this.startScreen = document.getElementById('startScreen');
         this.instructionsScreen = document.getElementById('instructionsScreen');
@@ -45,12 +48,14 @@ class VaquerosGame {
             player1: {
                 idle: new Image(),
                 jump: new Image(),
-                shoot: new Image()
+                shoot: new Image(),
+                defeated: new Image()
             },
             player2: {
                 idle: new Image(),
                 jump: new Image(),
-                shoot: new Image()
+                shoot: new Image(),
+                defeated: new Image()
             }
         };
         
@@ -58,11 +63,13 @@ class VaquerosGame {
         this.images.player1.idle.src = 'assets/image/vaquero1SinFondo.png';
         this.images.player1.jump.src = 'assets/image/Personaje1SaltandoSinFondo.png';
         this.images.player1.shoot.src = 'assets/image/personaje1DisárandoSinFondo.png';
+        this.images.player1.defeated.src = 'assets/image/Personaje1Derrotado.png';
         
         
         this.images.player2.idle.src = 'assets/image/vaquero2SinFondo.png';
         this.images.player2.jump.src = 'assets/image/Personaje2SaltandoSinFondo.png';
         this.images.player2.shoot.src = 'assets/image/Personaje2DisparandoSinFondo.png';
+        this.images.player2.defeated.src = 'assets/image/Personaje2Derrotado.png';
         
         
         this.loadSounds();
@@ -169,6 +176,7 @@ class VaquerosGame {
     startGame() {
         this.gameState = 'playing';
         this.gameTime = 0;
+        this.gameEndingSequence = false;
         
         // Ocultar menús y mostrar juego
         this.startScreen.style.display = 'none';
@@ -545,16 +553,26 @@ class VaquerosGame {
     checkGameOver() {
         if (this.player1 && this.player2) {
             if (this.player1.health <= 0 || this.player2.health <= 0) {
-                this.gameState = 'gameOver';
-                
-                // Mostrar pantalla de game over
+                // Determinar quién ganó
                 const winner = this.player1.health <= 0 ? 'Jugador 2' : 'Jugador 1';
-                document.getElementById('winnerText').textContent = `¡${winner} Gana!`;
-                this.gameOverScreen.style.display = 'flex';
-                document.body.className = 'game-over';
                 
-                // Reproducir sonido de victoria
-                this.playSound('victory');
+                // Si aún no hemos iniciado la secuencia de fin de juego
+                if (this.gameState === 'playing' && !this.gameEndingSequence) {
+                    this.gameEndingSequence = true;
+                    
+                    // Esperar 1.5 segundos para mostrar la animación de derrota
+                    setTimeout(() => {
+                        this.gameState = 'gameOver';
+                        
+                        // Mostrar pantalla de game over
+                        document.getElementById('winnerText').textContent = `¡${winner} Gana!`;
+                        this.gameOverScreen.style.display = 'flex';
+                        document.body.className = 'game-over';
+                        
+                        // Reproducir sonido de victoria
+                        this.playSound('victory');
+                    }, 1500);
+                }
             }
         }
     }
@@ -689,7 +707,10 @@ class VaquerosGame {
         
         // Seleccionar imagen según el estado
         let image;
-        if (player.isJumping) {
+        if (player.isDefeated) {
+            // Si el jugador está derrotado, usar la imagen de derrota
+            image = this.images[`player${player.id}`].defeated;
+        } else if (player.isJumping) {
             image = this.images[`player${player.id}`].jump;
         } else if (player.isShooting) {
             image = this.images[`player${player.id}`].shoot;
@@ -783,6 +804,7 @@ class Player {
         // Estados de animación
         this.isJumping = false;
         this.isShooting = false;
+        this.isDefeated = false; 
         this.shootTimer = 0;
         this.squashStretch = 0;
         this.wasInAir = false;
@@ -897,6 +919,12 @@ class Player {
     
     takeDamage(amount) {
         this.health = Math.max(0, this.health - amount);
+        
+        // Verificar si el jugador ha sido derrotado
+        if (this.health <= 0) {
+            this.isDefeated = true;
+            this.velocityX = 0; 
+        }
         
         // Principio 1: Squash and Stretch - Compresión al recibir daño
         this.squashStretch = -0.4;
